@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Solidity</title>
+</head>
+<body>
+    <script>
+        const worker = new Worker('/dist/worker.js');
+        worker.addEventListener("message", (e) => {
+           console.log("event", e.data);
+           if(e.data.type === "simulateResult") {
+               console.log(e.data.result);
+           }
+        });
+//         worker.postMessage({
+//             type: "simulate",
+//             game: "tic_tac_toe",
+//             code: `
+// // SPDX-License-Identifier: MIT
+// pragma solidity ^0.8.7;
+//
+// import { Tic_tac_toe_strategy, Player } from "./tic_tac_toe.sol";
+//
+// contract CustomStrategy is Tic_tac_toe_strategy {
+//     function get_move(Player[] memory _board) external override pure returns (uint) {
+//         // Returns first free position
+//         for (uint i = 0; i < _board.length; i++) {
+//             if (_board[i] == Player.None) return i;
+//         }
+//         // Cannot reach here
+//         revert();
+//     }
+// }
+//             `
+//         });
+        worker.postMessage({
+            type: "playGame",
+            game: "tic_tac_toe",
+            code: `
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.7;
+
+import { Tic_tac_toe_strategy, Player } from "./tic_tac_toe.sol";
+
+contract CustomStrategy is Tic_tac_toe_strategy {
+    function get_move(Player[] memory _board) external override pure returns (uint) {
+        // Returns first free position
+        for (uint i = 0; i < _board.length; i++) {
+            if (_board[i] == Player.None) return i;
+        }
+        
+        // Returns last free position
+        // for (uint i = _board.length - 1; i >= 0; i--) {
+        //     if (_board[i] == Player.None) return i;
+        // }
+        
+        // Cannot reach here
+        revert();
+    }
+}
+            `
+        });
+    </script>
+</body>
+</html>
